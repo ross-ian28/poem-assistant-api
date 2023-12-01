@@ -1,12 +1,15 @@
+// Define imports and dependencies
 const OpenAI = require("openai");
 const { Configuration, OpenAIApi } = OpenAI;
 
-const app = require('express');
+const express = require('express');
+const app = express();
+
 const bodyParser = require('body-parser');
 const cors = require('cors');
-require('dotenv').config()
-
 const port = 8080;
+
+require('dotenv').config()
 
 app.use(bodyParser.json());
 app.use(cors());
