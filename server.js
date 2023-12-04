@@ -28,7 +28,8 @@ app.post('/prompt-generator', async (req, res) => {
     messages: [
       { role: 'system', content: 'You are a helpful assistant creating poem prompts.' },
       { role: 'user', content: `Create ${amount} prompt for a short poem` },
-      { role: 'user', content: 'Order the prompt(s) in a list like so based on the amount of prompts requested: 1) "Refer to several different beverages" 2) "Include a childhood memory" These two are just examples, dont use them' }
+      { role: 'user', content: 'Order the prompt(s) in a list like so based on the amount of prompts requested: 1) "Refer to several different beverages" 2) "Include a childhood memory" These two are just examples, dont use them' },
+      { role: 'user', content: 'If the amount is equal to 1, be sure that only 1 prompt is given' }
     ]
   });
 
@@ -86,6 +87,24 @@ app.post('/word-generator', async (req, res) => {
         { role: 'system', content: 'You are a helpful assistant creating random words to inspire use in a poem.' },
         { role: 'user', content: `Create ${amount} word(s) to use in a short poem` },
         { role: 'user', content: 'Order the word(s) in a list like so based on the amount of words requested: 1) "Happy" 2) "Beautiful" These two are just examples, dont use them' }
+        ]
+    });
+    
+    if (response.data.choices[0]) {
+        res.json({ message: response.data.choices[0].message.content });
+    } else {
+        res.json({ message: 'Error retrieving response' });
+    }
+});
+
+app.post('/dictionary', async (req, res) => {
+    const { word } = req.body;
+    
+    const response = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: [
+        { role: 'system', content: 'You are a dictionary giving the definition of the word provided.' },
+        { role: 'user', content: `Give the definition of the word: ${word}` }
         ]
     });
     
