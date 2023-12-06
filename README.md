@@ -38,7 +38,7 @@
    ```
 5. Run your server
    ```sh
-     npm start
+     node server.js
    ```
 6. Be sure that both <a href="https://github.com/ross-ian28/poem-assistant-ui">front-end</a> and back-end servers are running at the same time
 
