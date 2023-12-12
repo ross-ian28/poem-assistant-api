@@ -33,7 +33,6 @@ app.post('/prompt-generator', async (req, res) => {
   });
 
   if (response.data.choices[0]) {
-    console.log("response", response)
     res.json({ message: response.data.choices[0].message.content });
   } else {
     res.json({ message: 'Error retrieving response' });
@@ -114,7 +113,11 @@ app.post('/dictionary', async (req, res) => {
     }
 });
 
-app.listen(
-  port, 
-  () => {console.log('Server is running on port', port);}
-);
+module.exports = app;
+
+if (require.main === module) {
+  app.listen(
+    port, 
+    () => {console.log('Server is running on port', port);}
+  );
+}
