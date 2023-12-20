@@ -113,6 +113,24 @@ app.post('/dictionary', async (req, res) => {
     }
 });
 
+app.post('/search', async (req, res) => {
+    const { question } = req.body;
+    
+    const response = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: [
+        { role: 'system', content: 'You are a web search engine answering questions given to you.' },
+        { role: 'user', content: `Answer my question: ${question}` }
+        ]
+    });
+    
+    if (response.data.choices[0]) {
+        res.json({ message: response.data.choices[0].message.content });
+    } else {
+        res.json({ message: 'Error retrieving response' });
+    }
+});
+
 module.exports = app;
 
 if (require.main === module) {
