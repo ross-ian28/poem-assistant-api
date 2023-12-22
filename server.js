@@ -120,7 +120,7 @@ app.post('/search', async (req, res) => {
         model: "gpt-3.5-turbo",
         messages: [
         { role: 'system', content: 'You are a web search engine answering questions given to you.' },
-        { role: 'user', content: `Answer my question: ${question}` }
+        { role: 'user', content: `Answer my question to the best of your ability while keeping it short abd detailed also with no fluff: ${question}` }
         ]
     });
     
