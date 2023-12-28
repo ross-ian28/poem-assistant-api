@@ -2,37 +2,32 @@
 const OpenAI = require("openai");
 const { Configuration, OpenAIApi } = OpenAI;
 
-// mongodb+srv://admin:<password>@poem-assistant-database.jtabmts.mongodb.net/?retryWrites=true&w=majority
-
+// Define mongodb dependencies
 const express = require('express');
-// const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+const Mongoclient = require('mongodb').MongoClient;
+const multer=require('multer');
+const CONNECTION_STRING=process.env.MONGO_STRING
+const DATABASENAME = "poem-assistant-database";
+var database;
+
+// Define port
 const app = express();
 const port = 8080;
 
+// Enable .env file
 require('dotenv').config()
+
+// Set up cors and json parser
+const bodyParser = require('body-parser');
+const cors = require('cors');
 app.use(bodyParser.json());
 app.use(cors());
 
+// Configure openapi 
 const configuration = new Configuration({
     apiKey: process.env.API_KEY
 });
 const openai = new OpenAIApi(configuration);
-
-
-// mongoose.connect('mongodb://localhost:27017/my_database', {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// });
-
-// mongoose.connection.on('connected', () => {
-//   console.log('Connected to MongoDB');
-// });
-
-// mongoose.connection.on('error', (err) => {
-//   console.error(`MongoDB connection error: ${err}`);
-// });
 
 app.post('/prompt-generator', async (req, res) => {
   const { amount } = req.body;
@@ -148,8 +143,17 @@ app.post('/search', async (req, res) => {
 module.exports = app;
 
 if (require.main === module) {
-  app.listen(
-    port, 
-    () => {console.log('Server is running on port', port);}
-  );
-}
+    app.listen(port, () => {
+      const url = new URL(CONNECTION_STRING);
+  
+      Mongoclient.connect(CONNECTION_STRING, { useNewUrlParser: true, useUnifiedTopology: true }, (error, client) => {
+        if (error) {
+          console.error('Mongo DB Connection Error:', error);
+        } else {
+          database = client.db(url.pathname.replace('/', ''));
+          console.log('Mongo DB Connection Successful');
+        }
+      });
+      console.log('Server is running on port', port);
+    });
+  }
