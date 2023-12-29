@@ -140,20 +140,36 @@ app.post('/search', async (req, res) => {
     }
 });
 
+// Get all users in database
+app.get('/users', (req, res) => {
+    database.collection("poem-assistant-collection").find({}).toArray((error, result) => {
+        if (error) {
+            res.json({ message: result });
+        } else {
+            res.json({ message: 'Error retrieving response' });
+        }
+    })
+});
+
 module.exports = app;
 
+// Run server on port 8080
 if (require.main === module) {
     app.listen(port, () => {
-      const url = new URL(CONNECTION_STRING);
-  
-      Mongoclient.connect(CONNECTION_STRING, { useNewUrlParser: true, useUnifiedTopology: true }, (error, client) => {
-        if (error) {
-          console.error('Mongo DB Connection Error:', error);
-        } else {
-          database = client.db(url.pathname.replace('/', ''));
-          console.log('Mongo DB Connection Successful');
-        }
-      });
       console.log('Server is running on port', port);
     });
   }
+
+// if (require.main === module) {
+//     app.listen(port, () => {
+//       Mongoclient.connect(CONNECTION_STRING, (error, client) => {
+//         if (error) {
+//           console.error('Mongo DB Connection Error:', error);
+//         } else {
+//           database=client.db[DATABASENAME];
+//           console.log('Mongo DB Connection Successful');
+//         }
+//       });
+//       console.log('Server is running on port', port);
+//     });
+//   }
