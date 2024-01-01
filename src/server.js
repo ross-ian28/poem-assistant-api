@@ -1,16 +1,16 @@
+// Import route files
+
 // Define imports and dependencies
 const OpenAI = require("openai");
 const { Configuration, OpenAIApi } = OpenAI;
 
 // Define mongodb dependencies
-const express = require('express');
-const Mongoclient = require('mongodb').MongoClient;
-const multer=require('multer');
-const CONNECTION_STRING=process.env.MONGO_STRING
-const DATABASENAME = "poem-assistant-database";
-var database;
+const mongoose = require('mongoose');
+mongoose.connect(`mongodb+srv://admin:${process.env.MONGO_STRING}@poem-assistant-database.jtabmts.mongodb.net/?retryWrites=true&w=majority`)
+const UserModel = require('../src/models/Users.js');
 
 // Define port
+const express = require('express');
 const app = express();
 const port = 8080;
 
@@ -142,14 +142,22 @@ app.post('/search', async (req, res) => {
 
 // Get all users in database
 app.get('/users', (req, res) => {
-    database.collection("poem-assistant-collection").find({}).toArray((error, result) => {
+    UserModel.find({}, (error, result) => {
         if (error) {
-            res.json({ message: result });
+            res.json({ message: `Error retrieving response: ${error}` });
         } else {
-            res.json({ message: 'Error retrieving response' });
+            res.json({ message: result });
         }
     })
 });
+
+app.post("/register", async (req, res) => {
+    const user = req.body;
+    const newUser = new UserModel(user);
+    await newUser.save();
+
+    res.json(user);
+})
 
 module.exports = app;
 
@@ -158,18 +166,4 @@ if (require.main === module) {
     app.listen(port, () => {
       console.log('Server is running on port', port);
     });
-  }
-
-// if (require.main === module) {
-//     app.listen(port, () => {
-//       Mongoclient.connect(CONNECTION_STRING, (error, client) => {
-//         if (error) {
-//           console.error('Mongo DB Connection Error:', error);
-//         } else {
-//           database=client.db[DATABASENAME];
-//           console.log('Mongo DB Connection Successful');
-//         }
-//       });
-//       console.log('Server is running on port', port);
-//     });
-//   }
+}
