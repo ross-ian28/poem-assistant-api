@@ -1,18 +1,6 @@
-// Import route files
-
 // Define imports and dependencies
 const OpenAI = require("openai");
 const { Configuration, OpenAIApi } = OpenAI;
-
-// Define mongodb dependencies
-// const mongoose = require('mongoose');
-// mongoose.connect(`mongodb+srv://admin:${process.env.MONGO_PASS}@poem-assistant-database.jtabmts.mongodb.net/?retryWrites=true&w=majority`)
-// const UserSchema = new mongoose.Schema({
-//     username: { type: String, required: true },
-//     password: { type: String, required: true },
-//     notes: { type: Array, required: false }
-// });
-// const UserModel = mongoose.model("poem-assistant-collection", UserSchema)
 
 // Define port
 const express = require('express');
@@ -144,25 +132,6 @@ app.post('/search', async (req, res) => {
         res.json({ message: 'Error retrieving response' });
     }
 });
-
-// Get all users in database
-// app.get('/users', (req, res) => {
-//     UserModel.find({}, (error, result) => {
-//         if (error) {
-//             res.json({ message: `Error retrieving response: ${error}` });
-//         } else {
-//             res.json({ message: result });
-//         }
-//     })
-// });
-
-// app.post("/register", async (req, res) => {
-//     const user = req.body;
-//     const newUser = new UserModel(user);
-//     await newUser.save();
-
-//     res.json(user);
-// })
 
 module.exports = app;
 
