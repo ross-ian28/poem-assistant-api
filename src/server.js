@@ -1,26 +1,35 @@
-// Define imports and dependencies
+// Define OpenAI dependencies
 const OpenAI = require("openai");
 const { Configuration, OpenAIApi } = OpenAI;
+
 
 // Define port
 const express = require('express');
 const app = express();
 const port = 8080;
 
+
 // Enable .env file
 require('dotenv').config()
 
-// Set up cors and json parser
+
+// Set up json parser and cors
 const bodyParser = require('body-parser');
-const cors = require('cors');
 app.use(bodyParser.json());
-app.use(cors());
+
+const cors = require('cors');
+const corsOptions = {
+    origin: ["http://localhost:3000", "https://poem-assistant-ui.vercel.app"]
+  };
+app.use(cors(corsOptions));
+
 
 // Configure openapi 
 const configuration = new Configuration({
     apiKey: process.env.API_KEY
 });
 const openai = new OpenAIApi(configuration);
+
 
 app.post('/prompt-generator', async (req, res) => {
   const { amount } = req.body;
@@ -41,15 +50,15 @@ app.post('/prompt-generator', async (req, res) => {
   }
 });
 
-app.post('/grammer-checker', async (req, res) => {
+app.post('/grammar-checker', async (req, res) => {
     const { message } = req.body;
     
     const response = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
         messages: [
-        { role: 'system', content: 'You are a poem writing assistant whos job is to help check the grammer of the text given' },
-        { role: 'user', content: `Take this text: ${message}. And check for any grammer errors and places where the grammer can be improved` },
-        { role: 'user', content: `After create a sepreate response for any spelling errors` }
+        { role: 'system', content: 'You are a poem writing assistant whos job is to help check the grammar of the text given' },
+        { role: 'user', content: `Take this text: ${message}. And check for any grammar errors and places where the grammar can be improved` },
+        { role: 'user', content: `After create a separate response for any spelling errors` }
         ]
     });
     
