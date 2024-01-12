@@ -1,36 +1,34 @@
-// Define OpenAI dependencies
+// OpenAI dependencies
 const OpenAI = require("openai");
 const { Configuration, OpenAIApi } = OpenAI;
 
 
-// Define port
+// Express and Middleware Dependencies
 const express = require('express');
 const app = express();
 const port = 8080;
-
-
-// Enable .env file
 require('dotenv').config()
-
-
-// Set up json parser and cors
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
-
 const cors = require('cors');
 const corsOptions = {
     origin: ["http://localhost:3000", "https://poem-assistant-ui.vercel.app"]
   };
 app.use(cors(corsOptions));
+const cookieSession = require("cookie-session");
 
 
-// Configure openapi 
+// MongoDB Dependencies
+// const { MongoClient } = require('mongodb');
+
+// Configure OpenAI
 const configuration = new Configuration({
     apiKey: process.env.API_KEY
 });
 const openai = new OpenAIApi(configuration);
 
 
+// Define API Endpoints
 app.post('/prompt-generator', async (req, res) => {
   const { amount } = req.body;
 
