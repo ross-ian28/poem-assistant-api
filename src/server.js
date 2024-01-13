@@ -3,6 +3,13 @@ const OpenAI = require("openai");
 const { Configuration, OpenAIApi } = OpenAI;
 
 
+// Configure OpenAI
+const configuration = new Configuration({
+    apiKey: process.env.API_KEY
+});
+const openai = new OpenAIApi(configuration);
+
+
 // Express and Middleware Dependencies
 const express = require('express');
 const app = express();
@@ -19,13 +26,17 @@ const cookieSession = require("cookie-session");
 
 
 // MongoDB Dependencies
-// const { MongoClient } = require('mongodb');
+const { MongoClient } = require('mongodb');
+const mongoURI = `mongodb+srv://admin:${process.env.MONGO_PASS}@poem-assistant-cluster.odlq8ic.mongodb.net/?retryWrites=true&w=majority`;
+const client = new MongoClient(mongoURI);
 
-// Configure OpenAI
-const configuration = new Configuration({
-    apiKey: process.env.API_KEY
+
+// Connect to MongoDB
+client.connect().then(() => {
+    console.log('Connected to MongoDB');
+  }).catch(err => {
+    console.error('Error connecting to MongoDB', err);
 });
-const openai = new OpenAIApi(configuration);
 
 
 // Define API Endpoints
@@ -137,6 +148,33 @@ app.post('/search', async (req, res) => {
         res.json({ message: response.data.choices[0].message.content });
     } else {
         res.json({ message: 'Error retrieving response' });
+    }
+});
+
+app.get('/users', async (req, res) => {
+    const database = client.db("poem-assistant-collection");
+    const collection = database.collection("users");
+
+    try {
+        const result = await collection.find();
+        res.json({ message: 'Users found successfully', data: result });
+    } catch (error) {
+        console.error('Error signing up user', error);
+        res.status(500).json({ message: 'Error signing up user' });
+    }
+});
+
+app.post('/signup', async (req,res) => {
+    const database = client.db("poem-assistant-collection");
+    const collection = database.collection("users");
+    const { username, password } = req.body;
+
+    try {
+        const result = await collection.insertOne({ username, password });
+        res.json({ message: 'User signed up successfully', data: result });
+    } catch (error) {
+        console.error('Error finding users', error);
+        res.status(500).json({ message: 'Error finding users' });
     }
 });
 
