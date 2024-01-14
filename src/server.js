@@ -10,13 +10,17 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 
-// Express and Middleware Dependencies
+// Express
 const express = require('express');
 const app = express();
 const port = 8080;
 require('dotenv').config()
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
+
+// Middleware Dependencies
+const bcrypt = require('bcrypt');
+const session = require('express-session');
 const cors = require('cors');
 const corsOptions = {
     origin: ["http://localhost:3000", "https://poem-assistant-ui.vercel.app"]
