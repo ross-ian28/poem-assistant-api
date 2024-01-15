@@ -2,7 +2,6 @@
 const OpenAI = require("openai");
 const { Configuration, OpenAIApi } = OpenAI;
 
-
 // Configure OpenAI
 const configuration = new Configuration({
     apiKey: process.env.API_KEY
@@ -10,7 +9,7 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 
-// Express
+// ExpressJS Dependencies
 const express = require('express');
 const app = express();
 const port = 8080;
@@ -20,30 +19,49 @@ app.use(bodyParser.json());
 
 // Middleware Dependencies
 const bcrypt = require('bcrypt');
-const session = require('express-session');
+const jwt = require('jsonwebtoken');
+
 const cors = require('cors');
 const corsOptions = {
     origin: ["http://localhost:3000", "https://poem-assistant-ui.vercel.app"]
   };
 app.use(cors(corsOptions));
-const cookieSession = require("cookie-session");
+
+const cookieSession = require('cookie-session');
+const crypto = require('crypto');
+process.env.SESSION_SECRET = crypto.randomBytes(32).toString('hex');
+app.use(cookieSession({
+    name: 'session',
+    keys: [process.env.SESSION_SECRET],
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+}));
 
 
 // Mongoose Dependencies
 const mongoose = require('mongoose');
 const mongoURI = `mongodb+srv://admin:${process.env.MONGO_PASS}@poem-assistant-cluster.odlq8ic.mongodb.net/?retryWrites=true&w=majority`;
-mongoose.connect(mongoURI);
-
 
 // Connect to MongoDB
-client.connect().then(() => {
+mongoose.connect(mongoURI).then(() => {
     console.log('Connected to MongoDB');
   }).catch(err => {
     console.error('Error connecting to MongoDB', err);
 });
 
+// User Schema
+const userSchema = new mongoose.Schema({
+    username: { 
+        type: String,
+        required: true,
+        unique: true
+    },
+    password: String,
+    notes: Array
+});
+const User = mongoose.model('User', userSchema);
 
-// Define API Endpoints
+
+// API Endpoints
 app.post('/prompt-generator', async (req, res) => {
   const { amount } = req.body;
 
@@ -155,31 +173,65 @@ app.post('/search', async (req, res) => {
     }
 });
 
-app.get('/users', async (req, res) => {
-    const database = client.db("poem-assistant-collection");
-    const collection = database.collection("users");
+app.post('/signup', async (req,res) => {
+    const { username, password } = req.body;
 
     try {
-        const result = await collection.find();
-        res.json({ message: 'Users found successfully', data: result });
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = new User({
+            username,
+            password: hashedPassword,
+            notes: []
+        })
+        await newUser.save();
+
+        res.status(201).json({ message: 'User created successfully' });
     } catch (error) {
         console.error('Error signing up user', error);
         res.status(500).json({ message: 'Error signing up user' });
     }
 });
 
-app.post('/signup', async (req,res) => {
-    const database = client.db("poem-assistant-collection");
-    const collection = database.collection("users");
+app.post('/login', async (req,res) => {
     const { username, password } = req.body;
 
     try {
-        const result = await collection.insertOne({ username, password });
-        res.json({ message: 'User signed up successfully', data: result });
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid username or password' });
+        }
+
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (passwordMatch) {
+            process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
+            const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+
+            // Set the token in a cookie
+            req.session.token = token;
+            res.json({ message: 'Login successful', token });
+        } else {
+            res.status(401).json({ message: 'Invalid username or password' });
+        } 
     } catch (error) {
-        console.error('Error finding users', error);
-        res.status(500).json({ message: 'Error finding users' });
+        console.error('Error logging in user', error);
+        res.status(500).json({ message: 'Error logging in user' });
     }
+});
+
+app.get('/notes', (req, res) => {
+    if (!req.session.token) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+  
+    jwt.verify(req.session.token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        res.json({ message: 'Protected route accessed', user: decoded });
+    });
 });
 
 module.exports = app;
