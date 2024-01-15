@@ -29,10 +29,10 @@ app.use(cors(corsOptions));
 const cookieSession = require("cookie-session");
 
 
-// MongoDB Dependencies
-const { MongoClient } = require('mongodb');
+// Mongoose Dependencies
+const mongoose = require('mongoose');
 const mongoURI = `mongodb+srv://admin:${process.env.MONGO_PASS}@poem-assistant-cluster.odlq8ic.mongodb.net/?retryWrites=true&w=majority`;
-const client = new MongoClient(mongoURI);
+mongoose.connect(mongoURI);
 
 
 // Connect to MongoDB
