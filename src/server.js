@@ -39,7 +39,7 @@ app.use(cookieSession({
 
 // Mongoose Dependencies
 const mongoose = require('mongoose');
-const mongoURI = `mongodb+srv://admin:${process.env.MONGO_PASS}@poem-assistant-cluster.odlq8ic.mongodb.net/?retryWrites=true&w=majority`;
+const mongoURI = `mongodb+srv://admin:${process.env.MONGO_PASS}@poem-assistant-cluster.odlq8ic.mongodb.net/poem-assistant-database`;
 
 // Connect to MongoDB
 mongoose.connect(mongoURI).then(() => {
@@ -189,7 +189,7 @@ app.post('/signup', async (req,res) => {
         res.status(201).json({ message: 'User created successfully' });
     } catch (error) {
         console.error('Error signing up user', error);
-        res.status(500).json({ message: 'Error signing up user' });
+        res.status(500).json({ message: 'Error signing up user', error });
     }
 });
 
@@ -198,13 +198,11 @@ app.post('/login', async (req,res) => {
 
     try {
         const user = await User.findOne({ username });
-
         if (!user) {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
 
         const passwordMatch = await bcrypt.compare(password, user.password);
-
         if (passwordMatch) {
             process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
             const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
