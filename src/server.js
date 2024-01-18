@@ -39,7 +39,7 @@ app.use(cookieSession({
 
 // Mongoose Dependencies
 const mongoose = require('mongoose');
-const mongoURI = `mongodb+srv://admin:${process.env.MONGO_PASS}@poem-assistant-cluster.odlq8ic.mongodb.net/poem-assistant-database`;
+const mongoURI = `mongodb+srv://admin:${process.env.MONGO_PASS}@poem-assistant-cluster.hgrcpsz.mongodb.net/poem-assistant-database`;
 
 // Connect to MongoDB
 mongoose.connect(mongoURI).then(() => {
