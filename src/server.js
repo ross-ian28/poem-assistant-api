@@ -186,10 +186,10 @@ app.post('/signup', async (req,res) => {
         })
         await newUser.save();
 
-        res.status(201).json({ message: 'User created successfully' });
+        res.json({ message: 'User created successfully' });
     } catch (error) {
         console.error('Error signing up user', error);
-        res.status(500).json({ message: 'Error signing up user', error });
+        res.json({ message: 'Error signing up user', error });
     }
 });
 
@@ -199,7 +199,7 @@ app.post('/login', async (req,res) => {
     try {
         const user = await User.findOne({ username });
         if (!user) {
-            return res.status(401).json({ message: 'Invalid username or password' });
+            return res.json({ message: 'Invalid username or password' });
         }
 
         const passwordMatch = await bcrypt.compare(password, user.password);
@@ -211,11 +211,11 @@ app.post('/login', async (req,res) => {
             req.session.token = token;
             res.json({ message: 'Login successful', token });
         } else {
-            res.status(401).json({ message: 'Invalid username or password' });
+            res.json({ message: 'Invalid username or password' });
         } 
     } catch (error) {
         console.error('Error logging in user', error);
-        res.status(500).json({ message: 'Error logging in user' });
+        res.json({ message: 'Error logging in user' });
     }
 });
 
