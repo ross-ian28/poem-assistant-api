@@ -70,7 +70,7 @@ app.post('/prompt-generator', async (req, res) => {
     messages: [
       { role: 'system', content: 'You are a helpful assistant creating a specified amount of poem prompts.' },
       { role: 'user', content: `Create "${amount}" prompt for a short poem` },
-      { role: 'user', content: 'Order the prompt(s) in a list like so based on the amount of prompts requested: 1) "Refer to several different beverages" 2) "Include a childhood memory" These two are just examples, dont use them' }
+      { role: 'user', content: 'Order the prompt(s) in a list like so based on the amount of prompts requested: 1) prompt1 2) prompt2' }
     ]
   });
 
@@ -163,6 +163,24 @@ app.post('/search', async (req, res) => {
         messages: [
         { role: 'system', content: 'You are a web search engine answering questions given to you.' },
         { role: 'user', content: `Answer my question to the best of your ability while keeping it short abd detailed also with no fluff: ${question}` }
+        ]
+    });
+    
+    if (response.data.choices[0]) {
+        res.json({ message: response.data.choices[0].message.content });
+    } else {
+        res.json({ message: 'Error retrieving response' });
+    }
+});
+
+app.post('/rhymes', async (req, res) => {
+    const { word } = req.body;
+    
+    const response = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: [
+        { role: 'system', content: 'You are a helpful assistant who finds rhymes for the word provided to help with writing poems.' },
+        { role: 'user', content: `Find me rhymes to the word: ${word}. Order the words in list format` }
         ]
     });
     
